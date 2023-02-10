@@ -1,5 +1,8 @@
 const btn = document.querySelectorAll(".btn");
 const ctx = document.getElementById("myChart");
+const chartDIV = document.querySelector(".chart");
+const bottomBTNs = document.querySelector(".bottom-btns");
+let chart;
 
 async function displayCountriesByContinent(continent) {
   try {
@@ -23,16 +26,26 @@ async function displayCountriesByContinent(continent) {
 
     countryNames = countriesObj.map((country) => country.name);
     countryPopulations = countriesObj.map((country) => country.population);
-    console.log(countryNames);
-    console.log(countryPopulations);
+    // console.log(countryNames);
+    // console.log(countryPopulations);
 
     createChart(ctx, countryNames, countryPopulations);
+    addCountryButtons(countryNames);
+    console.log(chart);
   } catch (error) {
     console.log(error);
   }
 }
 
-displayCountriesByContinent("asia");
+for (let i of btn) {
+  i.addEventListener("click", function () {
+    bottomBTNs.innerHTML = "";
+    const continentClass = i.classList[1];
+    displayCountriesByContinent(`${continentClass}`);
+  });
+}
+
+// displayCountriesByContinent("asia");
 
 // add class with continent name to each btn
 // every btn gets an eventlistener triggering the continet func with the corresponding continent
@@ -44,14 +57,25 @@ displayCountriesByContinent("asia");
 //add eventlistener to trigger each button to get corresponding cities
 // use chart functino created
 
+function addCountryButtons(countryArr) {
+  for (let i of countryArr) {
+    const newBTN = document.createElement("button");
+    newBTN.innerHTML = i;
+    bottomBTNs.appendChild(newBTN);
+  }
+}
+
 function createChart(chartDOM, labelArr, dataArr) {
-  new Chart(chartDOM, {
+  if (chart) {
+    chart.destroy();
+  }
+  chart = new Chart(chartDOM, {
     type: "bar",
     data: {
       labels: labelArr,
       datasets: [
         {
-          label: "# of Votes",
+          label: "Country population",
           data: dataArr,
           borderWidth: 1,
         },
