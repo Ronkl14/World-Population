@@ -4,6 +4,7 @@ const chartDIV = document.querySelector(".chart");
 const bottomBTNs = document.querySelector(".bottom-btns");
 const noData = document.querySelector(".no-data");
 const noDataCountry = document.querySelector(".no-data-span");
+const spinner = document.querySelector(".loading-spinner");
 let chart;
 
 async function displayCountriesByContinent(continent) {
@@ -35,6 +36,7 @@ async function displayCountriesByContinent(continent) {
     // console.log(countryNames);
     // console.log(countryPopulations);
 
+    spinner.classList.add("hide");
     createChart(ctx, countryNames, countryPopulations);
     addCountryButtons(countryNames, countryOfficialNames);
     const bottomBTNs = document.querySelectorAll(".btn-bottom");
@@ -49,6 +51,8 @@ async function displayCountriesByContinent(continent) {
 function addCountryListeners(buttons) {
   for (let btn of buttons) {
     btn.addEventListener("click", function (e) {
+      chart.destroy();
+      spinner.classList.remove("hide");
       noData.classList.add("hide");
       getCities(
         e.target.attributes.country.value,
@@ -86,6 +90,7 @@ async function getCities(countryName, countryOfficialName) {
       const cityPopulations = citiesData.map(
         (city) => city.populationCounts[0].value
       );
+      spinner.classList.add("hide");
       createChart(ctx, cityNames, cityPopulations);
 
       console.log(cityNames);
@@ -114,6 +119,7 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
     );
     if (!citiesRes.ok) {
       chart.destroy();
+      spinner.classList.add("hide");
       noData.classList.remove("hide");
       noDataCountry.innerHTML = `${countryName}`;
       throw new Error("NO DATA");
@@ -125,6 +131,7 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
       const cityPopulations = citiesData.map(
         (city) => city.populationCounts[0].value
       );
+      spinner.classList.add("hide");
       createChart(ctx, cityNames, cityPopulations);
 
       console.log(cityNames);
@@ -137,6 +144,7 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
 
 for (let i of btn) {
   i.addEventListener("click", function () {
+    spinner.classList.remove("hide");
     noData.classList.add("hide");
     bottomBTNs.innerHTML = "";
     const continentClass = i.classList[1];
