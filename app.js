@@ -37,7 +37,13 @@ async function displayCountriesByContinent(continent) {
     // console.log(countryPopulations);
 
     spinner.classList.add("hide");
-    createChart(ctx, countryNames, countryPopulations);
+    createChart(
+      ctx,
+      countryNames,
+      countryPopulations,
+      "Country Population",
+      "line"
+    );
     addCountryButtons(countryNames, countryOfficialNames);
     const bottomBTNs = document.querySelectorAll(".btn-bottom");
     // console.log(bottomBTNs);
@@ -91,7 +97,7 @@ async function getCities(countryName, countryOfficialName) {
         (city) => city.populationCounts[0].value
       );
       spinner.classList.add("hide");
-      createChart(ctx, cityNames, cityPopulations);
+      createChart(ctx, cityNames, cityPopulations, "City Population", "bar");
 
       console.log(cityNames);
       console.log(cityPopulations);
@@ -132,7 +138,7 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
         (city) => city.populationCounts[0].value
       );
       spinner.classList.add("hide");
-      createChart(ctx, cityNames, cityPopulations);
+      createChart(ctx, cityNames, cityPopulations, "City Population", "bar");
 
       console.log(cityNames);
       console.log(cityPopulations);
@@ -176,17 +182,17 @@ function addCountryButtons(countryArr, countryOfficialArr) {
   }
 }
 
-function createChart(chartDOM, labelArr, dataArr) {
+function createChart(chartDOM, labelArr, dataArr, labelText, style) {
   if (chart) {
     chart.destroy();
   }
   chart = new Chart(chartDOM, {
-    type: "line",
+    type: style,
     data: {
       labels: labelArr,
       datasets: [
         {
-          label: "Country population",
+          label: labelText,
           data: dataArr,
           borderWidth: 1,
         },
