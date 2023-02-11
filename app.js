@@ -1,4 +1,5 @@
 const btn = document.querySelectorAll(".btn");
+const topBTNs = document.querySelector(".top-btns");
 const ctx = document.getElementById("myChart");
 const chartDIV = document.querySelector(".chart");
 const bottomBTNs = document.querySelector(".bottom-btns");
@@ -33,8 +34,6 @@ async function displayCountriesByContinent(continent) {
     countryNames = countriesObj.map((country) => country.name);
     countryPopulations = countriesObj.map((country) => country.population);
     countryOfficialNames = countriesObj.map((country) => country.nameOfficial);
-    // console.log(countryNames);
-    // console.log(countryPopulations);
 
     spinner.classList.add("hide");
     createChart(
@@ -46,9 +45,7 @@ async function displayCountriesByContinent(continent) {
     );
     addCountryButtons(countryNames, countryOfficialNames);
     const bottomBTNs = document.querySelectorAll(".btn-bottom");
-    // console.log(bottomBTNs);
     addCountryListeners(bottomBTNs);
-    // console.log(chart);
   } catch (error) {
     console.log(error);
   }
@@ -90,7 +87,6 @@ async function getCities(countryName, countryOfficialName) {
       getCitiesByOfficialName(countryName, countryOfficialName);
     } else {
       const cities = await citiesRes.json();
-      console.log(cities.data);
       const citiesData = cities.data;
       const cityNames = citiesData.map((city) => city.city);
       const cityPopulations = citiesData.map(
@@ -98,9 +94,6 @@ async function getCities(countryName, countryOfficialName) {
       );
       spinner.classList.add("hide");
       createChart(ctx, cityNames, cityPopulations, "City Population", "bar");
-
-      console.log(cityNames);
-      console.log(cityPopulations);
     }
   } catch {}
 }
@@ -131,7 +124,6 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
       throw new Error("NO DATA");
     } else {
       const cities = await citiesRes.json();
-      console.log(cities.data);
       const citiesData = cities.data;
       const cityNames = citiesData.map((city) => city.city);
       const cityPopulations = citiesData.map(
@@ -139,36 +131,11 @@ async function getCitiesByOfficialName(countryName, countryOfficialName) {
       );
       spinner.classList.add("hide");
       createChart(ctx, cityNames, cityPopulations, "City Population", "bar");
-
-      console.log(cityNames);
-      console.log(cityPopulations);
     }
   } catch (error) {
     console.log(error);
   }
 }
-
-for (let i of btn) {
-  i.addEventListener("click", function () {
-    spinner.classList.remove("hide");
-    noData.classList.add("hide");
-    bottomBTNs.innerHTML = "";
-    const continentClass = i.classList[1];
-    displayCountriesByContinent(`${continentClass}`);
-  });
-}
-
-// displayCountriesByContinent("asia");
-
-// add class with continent name to each btn
-// every btn gets an eventlistener triggering the continet func with the corresponding continent
-//getCountriesByContinent returns an object of countries
-// change it to create arrays, or just use map on object?
-// function that will create chart
-//function that will insert buttons of each country
-//create async function to get cities
-//add eventlistener to trigger each button to get corresponding cities
-// use chart functino created
 
 function addCountryButtons(countryArr, countryOfficialArr) {
   for (let i = 0; i < countryArr.length; i++) {
@@ -207,3 +174,11 @@ function createChart(chartDOM, labelArr, dataArr, labelText, style) {
     },
   });
 }
+
+topBTNs.addEventListener("click", function (event) {
+  spinner.classList.remove("hide");
+  noData.classList.add("hide");
+  bottomBTNs.innerHTML = "";
+  const continentClass = event.target.classList[1];
+  displayCountriesByContinent(`${continentClass}`);
+});
