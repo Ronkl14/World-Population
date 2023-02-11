@@ -2,6 +2,8 @@ const btn = document.querySelectorAll(".btn");
 const ctx = document.getElementById("myChart");
 const chartDIV = document.querySelector(".chart");
 const bottomBTNs = document.querySelector(".bottom-btns");
+const noData = document.querySelector(".no-data");
+const noDataCountry = document.querySelector(".no-data-span");
 let chart;
 
 async function displayCountriesByContinent(continent) {
@@ -47,6 +49,7 @@ async function displayCountriesByContinent(continent) {
 function addCountryListeners(buttons) {
   for (let btn of buttons) {
     btn.addEventListener("click", function (e) {
+      noData.classList.add("hide");
       getCities(
         e.target.attributes.country.value,
         e.target.attributes.official.value
@@ -73,16 +76,25 @@ async function getCities(countryName, countryOfficialName) {
         }),
       }
     );
-    if (citiesRes.status === 404) {
-      getCitiesByOfficialName(countryOfficialName);
-    }
+    if (!citiesRes.ok) {
+      getCitiesByOfficialName(countryName, countryOfficialName);
+    } else {
+      const cities = await citiesRes.json();
+      console.log(cities.data);
+      const citiesData = cities.data;
+      const cityNames = citiesData.map((city) => city.city);
+      const cityPopulations = citiesData.map(
+        (city) => city.populationCounts[0].value
+      );
+      createChart(ctx, cityNames, cityPopulations);
 
-    const cities = await citiesRes.json();
-    console.log(cities.data);
+      console.log(cityNames);
+      console.log(cityPopulations);
+    }
   } catch {}
 }
 
-async function getCitiesByOfficialName(countryOfficialName) {
+async function getCitiesByOfficialName(countryName, countryOfficialName) {
   try {
     const citiesRes = await fetch(
       "https://countriesnow.space/api/v0.1/countries/population/cities/filter",
@@ -100,14 +112,32 @@ async function getCitiesByOfficialName(countryOfficialName) {
         }),
       }
     );
+    if (!citiesRes.ok) {
+      chart.destroy();
+      noData.classList.remove("hide");
+      noDataCountry.innerHTML = `${countryName}`;
+      throw new Error("NO DATA");
+    } else {
+      const cities = await citiesRes.json();
+      console.log(cities.data);
+      const citiesData = cities.data;
+      const cityNames = citiesData.map((city) => city.city);
+      const cityPopulations = citiesData.map(
+        (city) => city.populationCounts[0].value
+      );
+      createChart(ctx, cityNames, cityPopulations);
 
-    const cities = await citiesRes.json();
-    console.log(cities.data);
-  } catch {}
+      console.log(cityNames);
+      console.log(cityPopulations);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 for (let i of btn) {
   i.addEventListener("click", function () {
+    noData.classList.add("hide");
     bottomBTNs.innerHTML = "";
     const continentClass = i.classList[1];
     displayCountriesByContinent(`${continentClass}`);
