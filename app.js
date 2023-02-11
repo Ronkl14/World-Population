@@ -21,20 +21,89 @@ async function displayCountriesByContinent(continent) {
       countriesObj[idx].name = country.name.common;
     });
     countries.forEach(
+      (country, idx) => (countriesObj[idx].nameOfficial = country.name.official)
+    );
+    countries.forEach(
       (country, idx) => (countriesObj[idx].population = country.population)
     );
 
     countryNames = countriesObj.map((country) => country.name);
     countryPopulations = countriesObj.map((country) => country.population);
+    countryOfficialNames = countriesObj.map((country) => country.nameOfficial);
     // console.log(countryNames);
     // console.log(countryPopulations);
 
     createChart(ctx, countryNames, countryPopulations);
-    addCountryButtons(countryNames);
-    console.log(chart);
+    addCountryButtons(countryNames, countryOfficialNames);
+    const bottomBTNs = document.querySelectorAll(".btn-bottom");
+    // console.log(bottomBTNs);
+    addCountryListeners(bottomBTNs);
+    // console.log(chart);
   } catch (error) {
     console.log(error);
   }
+}
+
+function addCountryListeners(buttons) {
+  for (let btn of buttons) {
+    btn.addEventListener("click", function (e) {
+      getCities(
+        e.target.attributes.country.value,
+        e.target.attributes.official.value
+      );
+    });
+  }
+}
+
+async function getCities(countryName, countryOfficialName) {
+  try {
+    const citiesRes = await fetch(
+      "https://countriesnow.space/api/v0.1/countries/population/cities/filter",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          limit: 1000,
+          order: "asc",
+          orderBy: "name",
+          country: `${countryName}`,
+        }),
+      }
+    );
+    if (citiesRes.status === 404) {
+      getCitiesByOfficialName(countryOfficialName);
+    }
+
+    const cities = await citiesRes.json();
+    console.log(cities.data);
+  } catch {}
+}
+
+async function getCitiesByOfficialName(countryOfficialName) {
+  try {
+    const citiesRes = await fetch(
+      "https://countriesnow.space/api/v0.1/countries/population/cities/filter",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          limit: 1000,
+          order: "asc",
+          orderBy: "name",
+          country: `${countryOfficialName}`,
+        }),
+      }
+    );
+
+    const cities = await citiesRes.json();
+    console.log(cities.data);
+  } catch {}
 }
 
 for (let i of btn) {
@@ -57,10 +126,14 @@ for (let i of btn) {
 //add eventlistener to trigger each button to get corresponding cities
 // use chart functino created
 
-function addCountryButtons(countryArr) {
-  for (let i of countryArr) {
+function addCountryButtons(countryArr, countryOfficialArr) {
+  for (let i = 0; i < countryArr.length; i++) {
     const newBTN = document.createElement("button");
-    newBTN.innerHTML = i;
+    newBTN.classList.add("btn");
+    newBTN.classList.add("btn-bottom");
+    newBTN.setAttribute("country", countryArr[i]);
+    newBTN.setAttribute("official", countryOfficialArr[i]);
+    newBTN.innerHTML = countryArr[i];
     bottomBTNs.appendChild(newBTN);
   }
 }
@@ -70,7 +143,7 @@ function createChart(chartDOM, labelArr, dataArr) {
     chart.destroy();
   }
   chart = new Chart(chartDOM, {
-    type: "bar",
+    type: "line",
     data: {
       labels: labelArr,
       datasets: [
